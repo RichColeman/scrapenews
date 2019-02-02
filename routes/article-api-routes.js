@@ -1,14 +1,17 @@
 const db = require("../models");
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 // A GET route for scraping the echoJS website
-app.get("/scrape", function (req, res) {
+module.exports = function (app) {
+  app.get("/scrape", function (req, res) {
     // First, we grab the body of the html with axios
-    axios.get("http://www.pitchfork.com/latest").then(function (response) {
+    axios.get("https://pitchfork.com/reviews/albums/").then(function (response) {
       // Then, we load that into cheerio and save it to $ for a shorthand selector
       var $ = cheerio.load(response.data);
   
       // Now, we grab every h2 within an article tag, and do the following:
-      $("h2").each(function (i, element) {
+      $("review").each(function (i, element) {
         // Save an empty result object
         var result = {};
   
@@ -19,7 +22,7 @@ app.get("/scrape", function (req, res) {
         result.link = $(this)
           .children("a")
           .attr("href");
-  
+
         // Create a new Article using the `result` object built from scraping
         db.Article.create(result)
           .then(function (dbArticle) {
@@ -59,22 +62,16 @@ app.get("/scrape", function (req, res) {
   
   // Route for saving/updating an Article's associated Note
   app.post("/articles/:id", function (req, res) {
-    // TODO
-    // ====
-    // save the new note that gets posted to the Notes collection
-    // then find an article from the req.params.id
-    // and update it's "note" property with the _id of the new note
-  
     db.Note.create(req.body)
       .then(function (dbNote) {
         return db.Article.findOneAndUpdate({
           _id: req.params.id
         }, {
   
-          note: dbNote._id
-        }, {
-          new: true
-        });
+            note: dbNote._id
+          }, {
+            new: true
+          });
       })
       .then(function (dbArticle) {
         // If the User was updated successfully, send it back to the client
@@ -84,4 +81,5 @@ app.get("/scrape", function (req, res) {
         // If an error occurs, send it back to the client
         res.json(err);
       });
-  });
+  })
+};
