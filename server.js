@@ -42,7 +42,7 @@ require("./routes/article-api-routes")(app, axios, cheerio);
 app.use(express.static("public"));
 
 // Connect to the Mongo DB
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scrapenews";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://admin:password1@ds221095.mlab.com:21095/heroku_4mjht3gj";
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // Start the server
