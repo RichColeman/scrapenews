@@ -49,10 +49,6 @@ module.exports = function (app) {
   });
   // Route for grabbing a specific Article by id, populate it with it's note
   app.get("/articles/:id", function (req, res) {
-    // ====
-    // Finish the route so it finds one article using the req.params.id,
-    // and run the populate method with "note",
-    // then responds with the article with the note included
     db.Article.findOne({
       _id: req.params.id
     }).populate("note").then(function (data) {
@@ -75,12 +71,18 @@ module.exports = function (app) {
           });
       })
       .then(function (dbArticle) {
-        // If the User was updated successfully, send it back to the client
         res.json(dbArticle);
       })
       .catch(function (err) {
-        // If an error occurs, send it back to the client
         res.json(err);
       });
   })
+
+  app.delete("/articles/:id", function (req, res) {
+    db.Note.findByIdAndRemove(req.params.id, function (err) {
+        if (err) return next(err);
+        res.send('Deleted successfully!');
+    })
+  })
 };
+
